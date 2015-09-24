@@ -236,6 +236,36 @@ public:
         }
 
         /**
+         * Return true if section is executable
+         */
+        inline bool is_exec() const {
+                if((this->get_hdr().flags & shf::execinstr) == shf::execinstr)
+                        return true;
+                else
+                        return false;
+        }
+
+        /**
+         * Return true if section is allocatable.
+         */
+        inline bool is_alloc() const {
+                if ((this->get_hdr().flags & shf::alloc) == shf::alloc)
+                        return true;
+                else
+                        return false;
+        }
+
+        /**
+         * Return true if section is writable.
+         */
+        inline bool is_writable() const {
+                if((this->get_hdr().flags & shf::write) == shf::write)
+                        return true;
+                else
+                        return false;
+        }
+
+        /**
          * Return the ELF section header in canonical form (ELF64 in
          * native byte order).
          */
