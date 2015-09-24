@@ -26,3 +26,12 @@
 *.exe
 *.out
 *.app
+
+# Idea Clion Project
+.idea
+
+# Binary tests
+bin/*
+
+# Vim backups
+*~
