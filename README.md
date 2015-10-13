@@ -1,2 +1,2 @@
 # dithumb
-A simple disassembler for Thumb2 ELF files.
+A simple disassembler for ELF files based on Capstone library.
