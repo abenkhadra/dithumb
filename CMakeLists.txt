@@ -2,7 +2,17 @@ cmake_minimum_required(VERSION 3.2)
 project(elfparse)
 
 set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+
+#SET (CMAKE_CXX_COMPILER    "/usr/bin/clang++-3.5")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fno-omit-frame-pointer")
+
+#SET(DEBUG_LINK_FLAGS "-fsanitize=address")
+
+#add_definitions(${DEBUG_LINK_FLAGS})
+
+#SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${DEBUG_LINK_FLAGS}" )
+
 set(CMAKE_SOURCE_DIR "/home/ammar/ClionProjects/dithumb")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)

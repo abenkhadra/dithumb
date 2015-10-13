@@ -52,18 +52,17 @@ public:
 
     bool valid() const { return m_valid; }
     void disassembleCode() const;
-    void disassembleCode2() const;
     void disassembleSectionbyName(std::string& sec_name) const;
     void print_string_hex(unsigned char *str, size_t len) const;
 
 private:
-    void disassembleSection(const elf::section &sec, const csh *handle) const;
+    void disassembleSection(const elf::section &sec) const;
     void initializeCapstone(csh *handle) const;
 
 private:
     bool m_valid;
     const elf::elf* m_elf_obj;
-    CapstoneConfig m_config;
+    CapstoneConfig ls;
 };
 }
 

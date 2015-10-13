@@ -7,7 +7,7 @@ add_library(
         elf/to_string.cc
         elf/elf.cc
         disassembly/ElfDisassembler.cpp
-)
+        disassembly/BCInst.cpp)
 
 add_library(
         dwarf++ STATIC

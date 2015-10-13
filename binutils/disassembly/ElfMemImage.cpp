@@ -16,28 +16,27 @@ namespace disasm {
 using namespace std;
 
 
-ElfMemImage::ElfMemImage(const elf::elf &elf_file):
+ElfMemImage::ElfMemImage(const elf::elf &elf_file) :
     m_elf_file(elf_file),
-    m_valid{true}{
-
+    m_valid{true}
+{
     for (const auto &sec : elf_file.sections()) {
         if (sec.is_alloc()) {
             if (sec.is_writable()) {
                 m_write_sec.push_back(&sec);
-            }else if (sec.is_exec()) {
+            } else if (sec.is_exec()) {
                 m_exec_sec.push_back(&sec);
-            }else{
+            } else {
                 m_read_only_sec.push_back(&sec);
             }
-
         }
-
     }
 }
 
 
 const void *
-ElfMemImage::Load(off_t vaddr, size_t size){
+ElfMemImage::Load(off_t vaddr, size_t size)
+{
 //    if (vaddr < pimpl->m_base_vaddr || size > pimpl->m_size )
 //        throw range_error("virtual address out of range");
 //    return (const char*) pimpl->getPAddr(vaddr) ;
@@ -45,9 +44,9 @@ ElfMemImage::Load(off_t vaddr, size_t size){
 }
 
 
-
-const vector<elf::section*>
-ElfMemImage::getReadOnlySections() const{
+const vector<elf::section *>
+ElfMemImage::getReadOnlySections() const
+{
 //    std::vector<elf::section> result;
 //
 //    assert(m_elf_file.sections().size() != 0);
@@ -61,13 +60,15 @@ ElfMemImage::getReadOnlySections() const{
     return m_read_only_sec;
 }
 
-const vector<elf::section*>
-ElfMemImage::getWriteSections() const {
+const vector<elf::section *>
+ElfMemImage::getWriteSections() const
+{
     return m_write_sec;
 }
 
-const vector<elf::section*>
-ElfMemImage::getExecSections() const {
+const vector<elf::section *>
+ElfMemImage::getExecSections() const
+{
     return m_exec_sec;
 }
 

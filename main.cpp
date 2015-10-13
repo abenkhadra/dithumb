@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
 
     elf::elf f(elf::create_mmap_loader(fd));
     disasm::ElfDisassembler disassembler{f};
-    disassembler.disassembleCode2();
+    disassembler.disassembleCode();
 
 //    int i = 0;
 //    printf("  [Nr] %-16s %-16s %-16s %s\n",
