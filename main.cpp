@@ -1,7 +1,7 @@
-#include "elf/elf++.hh"
-
+#include "binutils/elf/elf++.hh"
+#include "disasm/ElfDisassembler.h"
+#include "disasm/ElfData.h"
 #include <fcntl.h>
-#include <disassembly/ElfDisassembler.h>
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -15,29 +15,15 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    elf::elf f(elf::create_mmap_loader(fd));
-    disasm::ElfDisassembler disassembler{f};
-    disassembler.disassembleCode();
+    elf::elf elf_obj(elf::create_mmap_loader(fd));
 
-//    int i = 0;
-//    printf("  [Nr] %-16s %-16s %-16s %s\n",
-//           "Name", "Type", "Address", "Offset");
-//    printf("       %-16s %-16s %-15s %5s %4s %5s\n",
-//           "Size", "EntSize", "Flags", "Link", "Info", "Align");
-//
-//    auto result = disasm::ElfMemLoader::getReadOnlySections(f);
-//
-//    for (auto &sec : result) {
-//        auto &hdr = sec.get_hdr();
-//        printf("  [%2d] %-16s %-16s %016lx %08lx\n", i++,
-//               sec.get_name().c_str(),
-//               to_string(hdr.type).c_str(),
-//               (unsigned long) hdr.addr, (unsigned long) hdr.offset);
-//        printf("       %016zx %016lx %-15s %5s %4d %5lu\n",
-//               sec.size(), (unsigned long) hdr.entsize,
-//               to_string(hdr.flags).c_str(), to_string(hdr.link).c_str(),
-//               (int) hdr.info, (unsigned long) hdr.addralign);
-//    }
+    if (static_cast<elf::ElfISA>(elf_obj.get_hdr().machine) !=  elf::ElfISA::kARM){
+        fprintf(stderr, "%s : Elf file architechture is not ARM.\n", argv[1]);
+        return 3;
+    }
+
+    disasm::ElfDisassembler disassembler{elf_obj};
+    disassembler.disassembleCode();
 
     return 0;
 }

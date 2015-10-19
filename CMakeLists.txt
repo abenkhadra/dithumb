@@ -3,8 +3,6 @@ project(elfparse)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-#SET (CMAKE_CXX_COMPILER    "/usr/bin/clang++-3.5")
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fno-omit-frame-pointer")
 
 #SET(DEBUG_LINK_FLAGS "-fsanitize=address")
@@ -17,10 +15,9 @@ set(CMAKE_SOURCE_DIR "/home/ammar/ClionProjects/dithumb")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+include_directories(modules)
 
-include_directories(binutils)
-
-add_subdirectory(binutils)
+add_subdirectory(modules)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
@@ -28,7 +25,7 @@ set(SOURCE_FILES main.cpp)
 
 add_executable(dithumb ${SOURCE_FILES} main.cpp)
 add_library(capstone STATIC IMPORTED)
-add_dependencies(dithumb elf++ dwarf++ capstone)
+add_dependencies(dithumb elf++ dwarf++ capstone disasm)
 
 
 target_link_libraries(dithumb ${CMAKE_SOURCE_DIR}/lib/libelf++.a)

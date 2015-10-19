@@ -32,6 +32,7 @@
 
 # Binary tests
 bin/*
+build/*
 
 # Vim backups
 *~

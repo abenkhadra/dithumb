@@ -8,29 +8,13 @@
 // Created by M. Ammar Ben Khadra.
 
 #pragma once
-#include "elf/elf++.hh"
+#include "binutils/elf/elf++.hh"
 #include <capstone/capstone.h>
 
 namespace disasm {
 
-struct CapstoneConfig final{
-public:
-    CapstoneConfig():
-        arch_type{CS_ARCH_ARM},
-        mode{CS_MODE_THUMB},
-        details{true}{
-    }
-    CapstoneConfig(const CapstoneConfig& src) = default;
-    CapstoneConfig &operator=(const CapstoneConfig& src) = default;
-
-    cs_arch arch_type;
-    cs_mode mode;
-    bool details;
-};
 /**
  * ElfDisassembler
- * This class is internally reference counted and efficiently
- * copyable.
  */
 class ElfDisassembler {
 public:
@@ -41,13 +25,12 @@ public:
     ElfDisassembler();
     /**
      * Prepares input file for disassembly.
-     * Pre-condition: file is a valid ELF file.
+     * Precondition: file is a valid ELF file.
      */
-    ElfDisassembler(const elf::elf &elf_obj);
-    ElfDisassembler(const elf::elf &elf_obj, const CapstoneConfig &config);
+    ElfDisassembler(const elf::elf &elf_file);
     virtual ~ElfDisassembler() = default;
-    ElfDisassembler(const ElfDisassembler &src) = default;
-    ElfDisassembler &operator=(const ElfDisassembler &src) = default;
+    ElfDisassembler(const ElfDisassembler &src) = delete;
+    ElfDisassembler &operator=(const ElfDisassembler &src) = delete;
     ElfDisassembler(ElfDisassembler &&src) = default;
 
     bool valid() const { return m_valid; }
@@ -61,8 +44,23 @@ private:
 
 private:
     bool m_valid;
-    const elf::elf* m_elf_obj;
-    CapstoneConfig ls;
+    const elf::elf* m_elf_file;
+
+    struct CapstoneConfig final{
+        public:
+        CapstoneConfig():
+        arch_type{CS_ARCH_ARM},
+            mode{CS_MODE_THUMB},
+            details{true}{
+        }
+        CapstoneConfig(const CapstoneConfig& src) = default;
+        CapstoneConfig &operator=(const CapstoneConfig& src) = default;
+
+        cs_arch arch_type;
+        cs_mode mode;
+        bool details;
+    };
+    CapstoneConfig m_config;
 };
 }
 

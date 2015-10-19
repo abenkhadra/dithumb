@@ -29,21 +29,12 @@ struct platform {
 ElfDisassembler::ElfDisassembler() : m_valid{false}
 { }
 
-ElfDisassembler::ElfDisassembler(const elf::elf &elf_obj) :
+ElfDisassembler::ElfDisassembler(const elf::elf &elf_file) :
     m_valid{true},
-    m_elf_obj{&elf_obj},
+    m_elf_file{&elf_file},
     m_config{}
 {
 }
-
-ElfDisassembler::ElfDisassembler(const elf::elf &elf_obj,
-                                 const CapstoneConfig &config) :
-    m_valid{true},
-    m_elf_obj{&elf_obj},
-    m_config{config}
-{
-}
-
 
 void
 ElfDisassembler::print_string_hex(unsigned char *str, size_t len) const
@@ -140,20 +131,17 @@ ElfDisassembler::disassembleSection(
 void
 ElfDisassembler::disassembleSectionbyName(std::string &sec_name) const
 {
-
-    for (auto &sec : m_elf_obj->sections()) {
+    for (auto &sec : m_elf_file->sections()) {
         if (sec.get_name() == sec_name) {
             disassembleSection(sec);
         }
     }
-
 }
 
 void
 ElfDisassembler::disassembleCode() const
 {
-
-    for (auto &sec : m_elf_obj->sections()) {
+    for (auto &sec : m_elf_file->sections()) {
         if (sec.is_alloc() && sec.is_exec()) {
             disassembleSection(sec);
         }
