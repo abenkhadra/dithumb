@@ -1,12 +1,5 @@
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ../lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ../lib)
-
-add_library(
-        disasm STATIC
-        disasm/ElfDisassembler.cpp
-        disasm/BCInst.cpp
-        disasm/ElfData.h)
-
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 
 add_library(
         elf++ STATIC
@@ -30,3 +23,12 @@ add_library(
         binutils/dwarf/value.cc
         binutils/dwarf/to_string.cc
 )
+
+add_library(
+        disasm STATIC
+        disasm/ElfDisassembler.cpp
+        disasm/BCInst.cpp
+        disasm/ElfData.h
+)
+
+add_dependencies(disasm elf++ dwarf++)

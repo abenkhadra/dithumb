@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
     }
 
     disasm::ElfDisassembler disassembler{elf_obj};
+
     disassembler.disassembleCode();
 
     return 0;

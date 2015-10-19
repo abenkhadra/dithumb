@@ -13,6 +13,13 @@
 
 namespace disasm {
 
+enum class ARMCodeSymbol: std::uint8_t {
+    kInvalid = 0,
+    kThumb = 1,
+    kARM = 2,
+    kData = 4
+};
+
 /**
  * ElfDisassembler
  */
@@ -27,7 +34,7 @@ public:
      * Prepares input file for disassembly.
      * Precondition: file is a valid ELF file.
      */
-    ElfDisassembler(const elf::elf &elf_file);
+    ElfDisassembler(const elf::elf& elf_file);
     virtual ~ElfDisassembler() = default;
     ElfDisassembler(const ElfDisassembler &src) = delete;
     ElfDisassembler &operator=(const ElfDisassembler &src) = delete;
@@ -41,6 +48,9 @@ public:
 private:
     void disassembleSection(const elf::section &sec) const;
     void initializeCapstone(csh *handle) const;
+    void prettyPrintInst(const csh& handle, cs_insn* inst) const;
+    std::vector<std::pair<size_t, ARMCodeSymbol>>
+        getCodeSymbolsForSection(const elf::section &sec) const;
 
 private:
     bool m_valid;
