@@ -28,18 +28,15 @@ public:
     kData() { return "$d"; }
 };
 
-ElfDisassembler::ElfDisassembler() : m_valid{false}
-{ }
+ElfDisassembler::ElfDisassembler() : m_valid{false} { }
 
 ElfDisassembler::ElfDisassembler(const elf::elf &elf_file) :
     m_valid{true},
     m_elf_file{&elf_file},
-    m_config{}
-{ }
+    m_config{} { }
 
 void
-ElfDisassembler::print_string_hex(unsigned char *str, size_t len) const
-{
+ElfDisassembler::print_string_hex(unsigned char *str, size_t len) const {
     unsigned char *c;
 
     printf("Code: ");
@@ -50,69 +47,85 @@ ElfDisassembler::print_string_hex(unsigned char *str, size_t len) const
 }
 
 void inline
-ElfDisassembler::initializeCapstone(csh *handle) const
-{
+ElfDisassembler::initializeCapstone(csh *handle) const {
     cs_err err_no;
-    err_no = cs_open(m_config.arch_type, m_config.mode, handle);
+    err_no = cs_open(CS_ARCH_ARM, CS_MODE_THUMB, handle);
     if (err_no) {
         throw std::runtime_error("Failed on cs_open() "
                                      "with error returned:" + err_no);
     }
 
-    if (m_config.details)
-        cs_option(*handle, CS_OPT_DETAIL, CS_OPT_ON);
-    else
-        cs_option(*handle, CS_OPT_DETAIL, CS_OPT_OFF);
-
+    cs_option(*handle, CS_OPT_DETAIL, CS_OPT_ON);
 }
 
 void
-ElfDisassembler::disassembleSection(
-    const elf::section &sec) const
-{
+ElfDisassembler::disassembleSection(const elf::section &sec) const {
     auto symbols = getCodeSymbolsForSection(sec);
-    printf("Symobls size is %lu \n", symbols.size());
-
-    for (auto& symbol : symbols) {
-        printf("Type %d, Addrd, 0x%#x \n", symbol.second, symbol.first);
-    }
-
+//    printf("Symobls size is %lu \n", symbols.size());
+//
+//    for (auto& symbol : symbols) {
+//        printf("Type %d, Addrd, 0x%#x \n", symbol.second, symbol.first);
+//    }
     csh handle;
-    initializeCapstone(&handle);
 
-    uint64_t address = sec.get_hdr().addr;
-    size_t size = sec.get_hdr().size;
-    const uint8_t *code_ptr = (const uint8_t *) sec.data();
+    initializeCapstone(&handle);
+    size_t start_addr = sec.get_hdr().addr;
+    size_t last_addr = start_addr + sec.get_hdr().size;
+    const uint8_t* code_ptr = (const uint8_t *) sec.data();
     cs_insn *inst;
 
     inst = cs_malloc(handle);
     BCInst instr(inst);
+
     printf("Section Name: %s\n", sec.get_name().c_str());
-    while (cs_disasm_iter(handle, &code_ptr, &size, &address, inst)) {
-        prettyPrintInst(handle, inst);
+
+    // We assume that symbols are ordered by their address. That should be valid
+    // in compiler constructed ELF.
+    size_t index = 0;
+    size_t address = 0;
+    size_t size = 0;
+
+    for (auto &symbol : symbols) {
+        index++;
+        if (symbol.second == ARMCodeSymbol::kData) {
+            if (index < symbols.size())
+                // adjust code_ptr to start of next symbol.
+                code_ptr += (symbols[index].first - symbol.first);
+            continue;
+        }
+        address = symbol.first;
+        if (index < symbols.size())
+            size = symbols[index].first - symbol.first;
+        else
+            size = last_addr - symbol.first;
+
+        if (symbol.second == ARMCodeSymbol::kARM)
+            cs_option(handle, CS_OPT_MODE, CS_MODE_ARM);
+        else
+            // We assume that the value of code symbol type is strictly
+            // either Data, ARM, or Thumb.
+            cs_option(handle, CS_OPT_MODE, CS_MODE_THUMB);
+
+        while (cs_disasm_iter(handle, &code_ptr, &size, &address, inst)) {
+            prettyPrintInst(handle, inst);
+        }
     }
 
-    printf("\n");
-
-    // free memory allocated by cs_malloc()
-//    cs_free(inst, 1);
     cs_close(&handle);
-
 }
 
 void
-ElfDisassembler::disassembleSectionbyName(std::string &sec_name) const
-{
+ElfDisassembler::disassembleSectionbyName(std::string &sec_name) const {
     for (auto &sec : m_elf_file->sections()) {
         if (sec.get_name() == sec_name) {
             disassembleSection(sec);
+            break;
         }
     }
 }
 
 void
-ElfDisassembler::disassembleCode() const
-{
+ElfDisassembler::disassembleCode() const {
     for (auto &sec : m_elf_file->sections()) {
         if (sec.is_alloc() && sec.is_exec()) {
             disassembleSection(sec);
@@ -120,7 +133,7 @@ ElfDisassembler::disassembleCode() const
     }
 }
 
-void ElfDisassembler::prettyPrintInst(const csh& handle, cs_insn *inst) const {
+void ElfDisassembler::prettyPrintInst(const csh &handle, cs_insn *inst) const {
 
     cs_detail *detail;
     int n;
@@ -132,7 +145,7 @@ void ElfDisassembler::prettyPrintInst(const csh& handle, cs_insn *inst) const {
     // print implicit registers used by this instruction
     detail = inst->detail;
 
-    if (detail == NULL) return ;
+    if (detail == NULL) return;
 
     if (detail->regs_read_count > 0) {
         printf("\tImplicit registers read: ");
