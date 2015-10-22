@@ -12,6 +12,7 @@
 #include "ElfDisassembler.h"
 #include "BCInst.h"
 #include <inttypes.h>
+#include <algorithm>
 
 namespace disasm {
 
@@ -61,7 +62,7 @@ ElfDisassembler::initializeCapstone(csh *handle) const {
 void
 ElfDisassembler::disassembleSection(const elf::section &sec) const {
     auto symbols = getCodeSymbolsForSection(sec);
-//    printf("Symobls size is %lu \n", symbols.size());
+//    printf("Symbols size is %lu \n", symbols.size());
 //
 //    for (auto& symbol : symbols) {
 //        printf("Type %d, Addrd, 0x%#x \n", symbol.second, symbol.first);
@@ -79,8 +80,7 @@ ElfDisassembler::disassembleSection(const elf::section &sec) const {
 
     printf("Section Name: %s\n", sec.get_name().c_str());
 
-    // We assume that symbols are ordered by their address. That should be valid
-    // in compiler constructed ELF.
+    // We assume that symbols are ordered by their address.
     size_t index = 0;
     size_t address = 0;
     size_t size = 0;
@@ -212,6 +212,9 @@ ElfDisassembler::getCodeSymbolsForSection(const elf::section &sec) const {
             }
         }
     }
+    // Symbols are not necessary sorted, this step is required to
+    // avoid potential SEGEV.
+    std::sort(result.begin(),result.end());
     return result;
 }
 }
