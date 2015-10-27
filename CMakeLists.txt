@@ -21,7 +21,7 @@ add_subdirectory(modules)
 
 add_library(capstone STATIC IMPORTED)
 
-set(SOURCE_FILES main.cpp)
+set(SOURCE_FILES ${CMAKE_SOURCE_DIR}/modules/util/cmdline.h main.cpp)
 
 add_executable(dithumb ${SOURCE_FILES} main.cpp)
 

@@ -60,7 +60,7 @@ ElfDisassembler::initializeCapstone(csh *handle) const {
 }
 
 void
-ElfDisassembler::disassembleSection(const elf::section &sec) const {
+ElfDisassembler::disassembleSectionUsingSymbols(const elf::section &sec) const {
     auto symbols = getCodeSymbolsForSection(sec);
 //    printf("Symbols size is %lu \n", symbols.size());
 //
@@ -118,17 +118,17 @@ void
 ElfDisassembler::disassembleSectionbyName(std::string &sec_name) const {
     for (auto &sec : m_elf_file->sections()) {
         if (sec.get_name() == sec_name) {
-            disassembleSection(sec);
+            disassembleSectionUsingSymbols(sec);
             break;
         }
     }
 }
 
 void
-ElfDisassembler::disassembleCode() const {
+ElfDisassembler::disassembleCodeUsingSymbols() const {
     for (auto &sec : m_elf_file->sections()) {
         if (sec.is_alloc() && sec.is_exec()) {
-            disassembleSection(sec);
+            disassembleSectionUsingSymbols(sec);
         }
     }
 }
@@ -217,5 +217,25 @@ ElfDisassembler::getCodeSymbolsForSection(const elf::section &sec) const {
     std::sort(result.begin(),result.end());
     return result;
 }
+
+bool
+ElfDisassembler::isSymbolTableAvailable() {
+    elf::section sym_sec = m_elf_file->get_section(".symtab");
+    // Returning a invalid section means that there was no symbol table
+    //  provided in ELF file.
+
+    return sym_sec.valid();
+}
+
+void
+ElfDisassembler::disassembleCode() const {
+
+}
+
+void
+ElfDisassembler::disassembleCodeSpeculative() const {
+    disassembleCode();
+}
+
 }
 

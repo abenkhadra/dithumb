@@ -41,12 +41,16 @@ public:
     ElfDisassembler(ElfDisassembler &&src) = default;
 
     bool valid() const { return m_valid; }
+    void disassembleCodeUsingSymbols() const;
     void disassembleCode() const;
+    void disassembleCodeSpeculative() const;
+
     void disassembleSectionbyName(std::string& sec_name) const;
     void print_string_hex(unsigned char *str, size_t len) const;
+    bool isSymbolTableAvailable();
 
 private:
-    void disassembleSection(const elf::section &sec) const;
+    void disassembleSectionUsingSymbols(const elf::section &sec) const;
     void initializeCapstone(csh *handle) const;
     void prettyPrintInst(const csh& handle, cs_insn* inst) const;
     std::vector<std::pair<size_t, ARMCodeSymbol>>
