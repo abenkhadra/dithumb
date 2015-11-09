@@ -14,7 +14,6 @@
 namespace disasm {
 
 enum class ARMCodeSymbol: std::uint8_t {
-    kInvalid = 0,
     kThumb = 1,
     kARM = 2,
     kData = 4
@@ -30,6 +29,7 @@ public:
      * methods other than valid on this results in undefined behavior.
      */
     ElfDisassembler();
+
     /**
      * Prepares input file for disassembly.
      * Precondition: file is a valid ELF file.
@@ -42,8 +42,6 @@ public:
 
     bool valid() const { return m_valid; }
     void disassembleCodeUsingSymbols() const;
-    void disassembleCode() const;
-    void disassembleCodeSpeculative() const;
 
     void disassembleSectionbyName(std::string& sec_name) const;
     void print_string_hex(unsigned char *str, size_t len) const;

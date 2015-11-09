@@ -226,16 +226,5 @@ ElfDisassembler::isSymbolTableAvailable() {
 
     return sym_sec.valid();
 }
-
-void
-ElfDisassembler::disassembleCode() const {
-
-}
-
-void
-ElfDisassembler::disassembleCodeSpeculative() const {
-    disassembleCode();
-}
-
 }
 
