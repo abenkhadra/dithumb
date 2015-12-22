@@ -48,9 +48,10 @@ public:
     bool isSymbolTableAvailable();
 
 private:
+    bool isBranch(const cs_insn *inst) const;
+    void prettyPrintInst(const csh& handle, cs_insn* inst) const;
     void disassembleSectionUsingSymbols(const elf::section &sec) const;
     void initializeCapstone(csh *handle) const;
-    void prettyPrintInst(const csh& handle, cs_insn* inst) const;
     std::vector<std::pair<size_t, ARMCodeSymbol>>
         getCodeSymbolsForSection(const elf::section &sec) const;
 

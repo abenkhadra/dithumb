@@ -133,6 +133,30 @@ ElfDisassembler::disassembleCodeUsingSymbols() const {
     }
 }
 
+bool ElfDisassembler::isBranch(const cs_insn *inst) const {
+    if (inst->detail == NULL) return false;
+
+    cs_detail *detail = inst->detail;
+    // assuming that each instruction should belong to at least one group
+    if (detail->groups[detail->groups_count - 1] == ARM_GRP_JUMP)
+        return true;
+    if (inst->id == ARM_INS_POP) {
+        // pop accepts a register list. If pc was among them then this a branch
+        for (int i = 0; i < detail->arm.op_count; ++i) {
+            if (detail->arm.operands[i].reg == ARM_REG_PC) return true;
+        }
+    }
+
+    if ((detail->arm.operands[0].type == ARM_OP_REG)
+        && (detail->arm.operands[0].reg == ARM_REG_PC)) {
+        if (inst->id == ARM_INS_STR) {
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
 void ElfDisassembler::prettyPrintInst(const csh &handle, cs_insn *inst) const {
 
     cs_detail *detail;
@@ -171,6 +195,10 @@ void ElfDisassembler::prettyPrintInst(const csh &handle, cs_insn *inst) const {
             printf("%s ", cs_group_name(handle, detail->groups[n]));
         }
         printf("\n");
+    }
+    if (isBranch(inst)){
+        printf("End of Basic Block.\n");
+        printf("***********************************\n");
     }
 }
 
