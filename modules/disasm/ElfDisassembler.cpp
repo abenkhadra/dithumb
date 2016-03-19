@@ -60,6 +60,35 @@ ElfDisassembler::initializeCapstone(csh *handle) const {
 }
 
 void
+ElfDisassembler::disassembleSectionUsingLinearSweep
+    (const elf::section &sec) const {
+    csh handle;
+
+    initializeCapstone(&handle);
+    if (m_elf_file->get_hdr().entry % 2) {
+        cs_option(handle, CS_OPT_MODE, CS_MODE_THUMB);
+    } else {
+        cs_option(handle, CS_OPT_MODE, CS_MODE_ARM);
+    }
+    cs_option(handle, CS_OPT_SKIPDATA, CS_OPT_ON);
+    size_t address = sec.get_hdr().addr;
+    size_t size =  sec.get_hdr().size;
+    const uint8_t *code_ptr = (const uint8_t *) sec.data();
+    cs_insn *inst;
+
+    inst = cs_malloc(handle);
+    BCInst instr(inst);
+
+    printf("Section Name: %s\n", sec.get_name().c_str());
+
+    while (cs_disasm_iter(handle, &code_ptr, &size, &address, inst)) {
+        prettyPrintInst(handle, inst);
+    }
+
+    cs_close(&handle);
+}
+
+void
 ElfDisassembler::disassembleSectionUsingSymbols(const elf::section &sec) const {
     auto symbols = getCodeSymbolsForSection(sec);
 //    printf("Symbols size is %lu \n", symbols.size());
@@ -72,7 +101,7 @@ ElfDisassembler::disassembleSectionUsingSymbols(const elf::section &sec) const {
     initializeCapstone(&handle);
     size_t start_addr = sec.get_hdr().addr;
     size_t last_addr = start_addr + sec.get_hdr().size;
-    const uint8_t* code_ptr = (const uint8_t *) sec.data();
+    const uint8_t *code_ptr = (const uint8_t *) sec.data();
     cs_insn *inst;
 
     inst = cs_malloc(handle);
@@ -129,6 +158,15 @@ ElfDisassembler::disassembleCodeUsingSymbols() const {
     for (auto &sec : m_elf_file->sections()) {
         if (sec.is_alloc() && sec.is_exec()) {
             disassembleSectionUsingSymbols(sec);
+        }
+    }
+}
+
+void
+ElfDisassembler::disassembleCodeUsingLinearSweep() const {
+    for (auto &sec : m_elf_file->sections()) {
+        if (sec.is_alloc() && sec.is_exec()) {
+            disassembleSectionUsingLinearSweep(sec);
         }
     }
 }
@@ -196,7 +234,7 @@ void ElfDisassembler::prettyPrintInst(const csh &handle, cs_insn *inst) const {
         }
         printf("\n");
     }
-    if (isBranch(inst)){
+    if (isBranch(inst)) {
         printf("End of Basic Block.\n");
         printf("***********************************\n");
     }
@@ -242,7 +280,7 @@ ElfDisassembler::getCodeSymbolsForSection(const elf::section &sec) const {
     }
     // Symbols are not necessary sorted, this step is required to
     // avoid potential SEGEV.
-    std::sort(result.begin(),result.end());
+    std::sort(result.begin(), result.end());
     return result;
 }
 

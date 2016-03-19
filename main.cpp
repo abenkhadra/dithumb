@@ -8,12 +8,10 @@ using namespace std;
 
 struct ConfigConsts {
     const std::string kFile;
-    const std::string kNoSymbols;
-    const std::string kSpeculative;
+    const std::string kLinearSweep;
 
     ConfigConsts(): kFile{"file"},
-                  kNoSymbols{"no-symbols"},
-                  kSpeculative{"speculative"}{}
+                  kLinearSweep{"linear-sweep"}{}
 };
 
 int main(int argc, char **argv) {
@@ -22,7 +20,7 @@ int main(int argc, char **argv) {
     cmdline::parser cmd_parser;
     cmd_parser.add<string>(config.kFile, 'f',
                    "Path to an ARM ELF file to be disassembled", true, "");
-
+    cmd_parser.add(config.kLinearSweep, 'l', "Disassembly using linear sweep");
     cmd_parser.parse_check(argc, argv);
 
     auto file_path = cmd_parser.get<string>(config.kFile);
@@ -37,15 +35,16 @@ int main(int argc, char **argv) {
 
     // We only disassmble ARM/Thumb executables.
     if (static_cast<elf::ElfISA>(elf_file.get_hdr().machine) !=  elf::ElfISA::kARM){
-        fprintf(stderr, "%s : Elf file architechture is not ARM!\n", argv[1]);
+        fprintf(stderr, "%s : Elf file architecture is not ARM!\n", argv[1]);
         return 3;
     }
 
     disasm::ElfDisassembler disassembler{elf_file};
-    if(disassembler.isSymbolTableAvailable())
-        disassembler.disassembleCodeUsingSymbols();
+    if(!disassembler.isSymbolTableAvailable()
+        || cmd_parser.exist(config.kLinearSweep))
+        disassembler.disassembleCodeUsingLinearSweep();
     else
-        fprintf(stderr, "%s : Elf file doesn't contain symbol table!\n", argv[2]);
+        disassembler.disassembleCodeUsingSymbols();
 
     return 0;
 }
