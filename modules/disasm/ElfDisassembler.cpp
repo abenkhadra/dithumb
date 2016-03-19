@@ -143,12 +143,11 @@ ElfDisassembler::disassembleSectionUsingSymbols(const elf::section &sec) const {
     cs_close(&handle);
 }
 
-void
-ElfDisassembler::disassembleSectionbyName(std::string &sec_name) const {
+const elf::section &
+ElfDisassembler::findSectionbyName(std::string sec_name) const {
     for (auto &sec : m_elf_file->sections()) {
         if (sec.get_name() == sec_name) {
-            disassembleSectionUsingSymbols(sec);
-            break;
+            return sec;
         }
     }
 }
