@@ -6,6 +6,9 @@ Available instructions are read based on code symbols and printed to stdout.
 When symbol table is not found, disassmebly is done using a linear sweep 
 similar to **objdump**. It's possible to use linear sweep directly using **-l** option. 
 
+For a quick test, compile the program and run it on the demo ELF :
+> ./dithumb -t -f tests/echo
+
 # Dependencies 
 
-The project is self-contained except for Capstone library.
+The project is self-contained except for Capstone disassembly library. 
