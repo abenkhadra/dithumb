@@ -205,9 +205,12 @@ void ElfDisassembler::prettyPrintInst(const csh &handle, cs_insn *inst) const {
     cs_detail *detail;
     int n;
 
-    printf("0x%" PRIx64 ":\t%s\t\t%s // insn-ID: %u, insn-mnem: %s\n",
-           inst->address, inst->mnemonic, inst->op_str,
-           inst->id, cs_insn_name(handle, inst->id));
+    printf("0x%" PRIx64 ":\t%s\t\t%s\n",
+           inst->address, inst->mnemonic, inst->op_str);
+
+//    printf("0x%" PRIx64 ":\t%s\t\t%s // insn-ID: %u, insn-mnem: %s\n",
+//           inst->address, inst->mnemonic, inst->op_str,
+//           inst->id, cs_insn_name(handle, inst->id));
 
     // print implicit registers used by this instruction
 //    detail = inst->detail;
