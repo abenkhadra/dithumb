@@ -3,15 +3,8 @@
 // This file is distributed under the MIT License. See LICENSE.TXT for details.
 //
 //===----------------------------------------------------------------------===//
-//===------------------------------------------------------------*- C++ -*-===//
-//
-// This file is distributed under the MIT License. See LICENSE.TXT for details.
-//
-//===----------------------------------------------------------------------===//
 //
 // Copyright (c) 2015 Technical University of Kaiserslautern.
-// Created by M. Ammar Ben Khadra.
-
 
 #pragma once
 

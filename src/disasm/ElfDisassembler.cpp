@@ -5,9 +5,6 @@
 //===----------------------------------------------------------------------===//
 // 
 // Copyright (c) 2015 Technical University of Kaiserslautern.
-// Created by M. Ammar Ben Khadra.
-
-//
 
 #include "ElfDisassembler.h"
 #include "BCInst.h"
@@ -72,7 +69,7 @@ ElfDisassembler::disassembleSectionUsingLinearSweep
     }
     cs_option(handle, CS_OPT_SKIPDATA, CS_OPT_ON);
     size_t address = sec.get_hdr().addr;
-    size_t size =  sec.get_hdr().size;
+    size_t size = sec.get_hdr().size;
     const uint8_t *code_ptr = (const uint8_t *) sec.data();
     cs_insn *inst;
 
@@ -106,14 +103,15 @@ ElfDisassembler::disassembleSectionUsingSymbols(const elf::section &sec) const {
 
     inst = cs_malloc(handle);
     BCInst instr(inst);
-
-    printf("Section Name: %s\n", sec.get_name().c_str());
+    printf("***********************************\n");
+    printf("Section name: %s\n", sec.get_name().c_str());
 
     // We assume that symbols are ordered by their address.
     size_t index = 0;
     size_t address = 0;
     size_t size = 0;
-
+    size_t instruction_count = 0;
+    size_t basic_block_count = 0;
     for (auto &symbol : symbols) {
         index++;
         if (symbol.second == ARMCodeSymbol::kData) {
@@ -137,9 +135,17 @@ ElfDisassembler::disassembleSectionUsingSymbols(const elf::section &sec) const {
 
         while (cs_disasm_iter(handle, &code_ptr, &size, &address, inst)) {
             prettyPrintInst(handle, inst);
+            instruction_count++;
+            if (isBranch(inst)) {
+                printf("Basic block end.\n");
+                printf("***********************************\n");
+                basic_block_count++;
+            }
         }
     }
-
+    printf("Instruction count: %lu, Basic Block count: %lu\n",
+           instruction_count,
+           basic_block_count);
     cs_close(&handle);
 }
 
@@ -233,10 +239,6 @@ void ElfDisassembler::prettyPrintInst(const csh &handle, cs_insn *inst) const {
 //        }
 //        printf("\n");
 //    }
-    if (isBranch(inst)) {
-        printf("End of Basic Block.\n");
-        printf("***********************************\n");
-    }
 }
 
 std::vector<std::pair<size_t, ARMCodeSymbol>>
