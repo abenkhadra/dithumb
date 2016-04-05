@@ -51,6 +51,7 @@ public:
 
 private:
     bool isBranch(const cs_insn *inst) const;
+    bool isDirectBranch(const cs_insn *inst) const;
     void prettyPrintInst(const csh& handle, cs_insn* inst) const;
 
     void initializeCapstone(csh *handle) const;

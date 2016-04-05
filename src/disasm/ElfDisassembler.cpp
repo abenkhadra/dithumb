@@ -72,7 +72,9 @@ ElfDisassembler::disassembleSectionUsingLinearSweep
     size_t size = sec.get_hdr().size;
     const uint8_t *code_ptr = (const uint8_t *) sec.data();
     cs_insn *inst;
-
+    size_t instruction_count = 0;
+    size_t basic_block_count = 0;
+    size_t direct_branch_count = 0;
     inst = cs_malloc(handle);
     BCInst instr(inst);
 
@@ -80,8 +82,25 @@ ElfDisassembler::disassembleSectionUsingLinearSweep
 
     while (cs_disasm_iter(handle, &code_ptr, &size, &address, inst)) {
         prettyPrintInst(handle, inst);
+        instruction_count++;
+        if (isBranch(inst)) {
+            printf("Basic block end.\n");
+            printf("***********************************\n");
+            basic_block_count++;
+            if (isDirectBranch(inst)) {
+                direct_branch_count++;
+            }
+        }
     }
-
+    printf("Instruction count: %lu, Basic Block count: %lu, "
+               "Direct jumps: %lu (%2.2f \%), Indirect jumps:%lu (%2.2f \%)\n",
+           instruction_count,
+           basic_block_count,
+           direct_branch_count,
+           ((double)direct_branch_count * 100) / (double)basic_block_count,
+           basic_block_count - direct_branch_count,
+           ((double)(basic_block_count - direct_branch_count) * 100)
+               / (double)(basic_block_count));
     cs_close(&handle);
 }
 
@@ -112,6 +131,7 @@ ElfDisassembler::disassembleSectionUsingSymbols(const elf::section &sec) const {
     size_t size = 0;
     size_t instruction_count = 0;
     size_t basic_block_count = 0;
+    size_t direct_branch_count = 0;
     for (auto &symbol : symbols) {
         index++;
         if (symbol.second == ARMCodeSymbol::kData) {
@@ -140,12 +160,21 @@ ElfDisassembler::disassembleSectionUsingSymbols(const elf::section &sec) const {
                 printf("Basic block end.\n");
                 printf("***********************************\n");
                 basic_block_count++;
+                if (isDirectBranch(inst)) {
+                    direct_branch_count++;
+                }
             }
         }
     }
-    printf("Instruction count: %lu, Basic Block count: %lu\n",
+    printf("Instruction count: %lu, Basic Block count: %lu, "
+               "Direct jumps: %lu (%2.2f \%), Indirect jumps:%lu (%2.2f \%)\n",
            instruction_count,
-           basic_block_count);
+           basic_block_count,
+           direct_branch_count,
+           ((double)direct_branch_count * 100) / (double)basic_block_count,
+           basic_block_count - direct_branch_count,
+           ((double)(basic_block_count - direct_branch_count) * 100)
+               / (double)(basic_block_count));
     cs_close(&handle);
 }
 
@@ -174,6 +203,11 @@ ElfDisassembler::disassembleCodeUsingLinearSweep() const {
             disassembleSectionUsingLinearSweep(sec);
         }
     }
+}
+
+bool ElfDisassembler::isDirectBranch(const cs_insn *inst) const {
+    return inst->detail->arm.op_count == 1
+        && inst->detail->arm.operands[0].type == ARM_OP_IMM;
 }
 
 bool ElfDisassembler::isBranch(const cs_insn *inst) const {
