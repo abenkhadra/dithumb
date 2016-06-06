@@ -92,15 +92,15 @@ ElfDisassembler::disassembleSectionUsingLinearSweep
             }
         }
     }
-    printf("Instruction count: %lu, Basic Block count: %lu, "
-               "Direct jumps: %lu (%2.2f \%), Indirect jumps:%lu (%2.2f \%)\n",
+    printf("Instruction count: %lu\nBasic Block count: %lu\n"
+               "Direct jumps: %lu (%2.2f \%%)\nIndirect jumps:%lu (%2.2f \%%)\n",
            instruction_count,
            basic_block_count,
            direct_branch_count,
            ((double)direct_branch_count * 100) / (double)basic_block_count,
            basic_block_count - direct_branch_count,
-           ((double)(basic_block_count - direct_branch_count) * 100)
-               / (double)(basic_block_count));
+           (double)((basic_block_count - direct_branch_count) * 100
+               / basic_block_count));
     cs_close(&handle);
 }
 
@@ -166,15 +166,15 @@ ElfDisassembler::disassembleSectionUsingSymbols(const elf::section &sec) const {
             }
         }
     }
-    printf("Instruction count: %lu, Basic Block count: %lu, "
-               "Direct jumps: %lu (%2.2f \%), Indirect jumps:%lu (%2.2f \%)\n",
+    printf("Instruction count: %lu\nBasic Block count: %lu\n"
+               "Direct jumps: %lu (%2.2f \%%)\nIndirect jumps:%lu (%2.2f \%%)\n",
            instruction_count,
            basic_block_count,
            direct_branch_count,
            ((double)direct_branch_count * 100) / (double)basic_block_count,
            basic_block_count - direct_branch_count,
-           ((double)(basic_block_count - direct_branch_count) * 100)
-               / (double)(basic_block_count));
+           (double)((basic_block_count - direct_branch_count) * 100
+               / basic_block_count));
     cs_close(&handle);
 }
 
